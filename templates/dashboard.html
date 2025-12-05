@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Finance Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .sidebar {
+            transition: transform 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar.hidden {
+                transform: translateX(-100%);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg">
+        <i class="fas fa-bars text-gray-700"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar fixed left-0 top-0 h-full w-64 gradient-bg text-white p-6 z-40">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold">Finance Tracker</h1>
+            <p class="text-purple-200 text-sm" id="userName">Loading...</p>
+        </div>
+
+        <nav class="space-y-2">
+            <a href="/dashboard" class="flex items-center space-x-3 bg-white bg-opacity-20 rounded-lg px-4 py-3">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transactions-page"
+                class="flex items-center space-x-3 hover:bg-white hover:bg-opacity-10 rounded-lg px-4 py-3 transition">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="/profile-page"
+                class="flex items-center space-x-3 hover:bg-white hover:bg-opacity-10 rounded-lg px-4 py-3 transition">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <button onclick="logout()"
+                class="w-full flex items-center space-x-3 hover:bg-white hover:bg-opacity-10 rounded-lg px-4 py-3 transition">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="md:ml-64 p-4 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Dashboard</h2>
+                <p class="text-gray-600">Overview of your financial status</p>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-600 text-sm font-semibold">Total Income</p>
+                            <p class="text-3xl font-bold text-green-600" id="totalIncome">$0</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-arrow-up text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-red-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-600 text-sm font-semibold">Total Expenses</p>
+                            <p class="text-3xl font-bold text-red-600" id="totalExpense">$0</p>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <i class="fas fa-arrow-down text-red-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purple-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-600 text-sm font-semibold">Current Balance</p>
+                            <p class="text-3xl font-bold text-purple-600" id="balance">$0</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-wallet text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="openAddTransactionModal('income')"
+                        class="gradient-bg text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition flex items-center justify-center space-x-2">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Add Income</span>
+                    </button>
+                    <button onclick="openAddTransactionModal('expense')"
+                        class="bg-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-600 transition flex items-center justify-center space-x-2">
+                        <i class="fas fa-minus-circle"></i>
+                        <span>Add Expense</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Income vs Expense Chart -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Income vs Expense</h3>
+                    <canvas id="incomeExpenseChart"></canvas>
+                </div>
+
+                <!-- Category Breakdown Chart -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Expense Categories</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Monthly Trend Chart -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Monthly Trend</h3>
+                <canvas id="monthlyTrendChart"></canvas>
+            </div>
+
+            <!-- Export Options -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Export Data</h3>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="exportExcel()"
+                        class="bg-green-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-600 transition flex items-center space-x-2">
+                        <i class="fas fa-file-excel"></i>
+                        <span>Export Excel</span>
+                    </button>
+                    <button onclick="exportPDF()"
+                        class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition flex items-center space-x-2">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Export PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Transaction Modal -->
+    <div id="transactionModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6" id="modalTitle">Add Transaction</h3>
+            <form id="transactionForm" onsubmit="handleAddTransaction(event)">
+                <input type="hidden" id="transactionType">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Category</label>
+                    <select id="category" required
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none">
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Amount</label>
+                    <input type="number" id="amount" step="0.01" min="0.01" required
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none"
+                        placeholder="0.00">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Date</label>
+                    <input type="date" id="date" required
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Description</label>
+                    <textarea id="description" rows="3"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none"
+                        placeholder="Optional notes..."></textarea>
+                </div>
+                <div class="flex space-x-4">
+                    <button type="submit"
+                        class="flex-1 gradient-bg text-white font-semibold py-3 rounded-lg hover:opacity-90 transition">
+                        Add Transaction
+                    </button>
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 bg-gray-300 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-400 transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Business', 'Investments', 'Gifts', 'Other Income'];
+        const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Healthcare', 'Education', 'Other Expense'];
+
+        let charts = {};
+
+        // Check authentication
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/';
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('hidden');
+        });
+
+        // Load user data
+        async function loadUserData() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            document.getElementById('userName').textContent = user.name || 'User';
+        }
+
+        // Load summary and charts
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/summary', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateSummary(data);
+                    updateCharts(data);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function updateSummary(data) {
+            document.getElementById('totalIncome').textContent = formatCurrency(data.total_income);
+            document.getElementById('totalExpense').textContent = formatCurrency(data.total_expense);
+            document.getElementById('balance').textContent = formatCurrency(data.balance);
+        }
+
+        function updateCharts(data) {
+            // Income vs Expense Bar Chart
+            const ctx1 = document.getElementById('incomeExpenseChart').getContext('2d');
+            if (charts.incomeExpense) charts.incomeExpense.destroy();
+            charts.incomeExpense = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Income', 'Expense'],
+                    datasets: [{
+                        label: 'Amount',
+                        data: [data.total_income, data.total_expense],
+                        backgroundColor: ['#10b981', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Category Pie Chart
+            const ctx2 = document.getElementById('categoryChart').getContext('2d');
+            if (charts.category) charts.category.destroy();
+            const categoryData = data.category_spending || {};
+            charts.category = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categoryData),
+                    datasets: [{
+                        data: Object.values(categoryData),
+                        backgroundColor: ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: true }
+            });
+
+            // Monthly Trend Line Chart
+            const ctx3 = document.getElementById('monthlyTrendChart').getContext('2d');
+            if (charts.monthlyTrend) charts.monthlyTrend.destroy();
+            const monthlyData = data.monthly_summary || [];
+            charts.monthlyTrend = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: monthlyData.map(m => m.month),
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: monthlyData.map(m => m.income),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Expense',
+                            data: monthlyData.map(m => m.expense),
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        }
+
+        function openAddTransactionModal(type) {
+            document.getElementById('transactionType').value = type;
+            document.getElementById('modalTitle').textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+
+            const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = '';
+            const categories = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                categorySelect.appendChild(option);
+            });
+
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('transactionModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('transactionModal').classList.add('hidden');
+            document.getElementById('transactionForm').reset();
+        }
+
+        async function handleAddTransaction(e) {
+            e.preventDefault();
+
+            const transaction = {
+                type: document.getElementById('transactionType').value,
+                category: document.getElementById('category').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                date: document.getElementById('date').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                const response = await fetch('/transactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(transaction)
+                });
+
+                if (response.ok) {
+                    showNotification('Transaction added successfully!');
+                    closeModal();
+                    loadDashboard();
+                } else {
+                    const data = await response.json();
+                    showNotification(data.error || 'Failed to add transaction', 'error');
+                }
+            } catch (error) {
+                showNotification('An error occurred', 'error');
+            }
+        }
+
+        async function exportExcel() {
+            try {
+                const response = await fetch('/export/excel', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `transactions_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    showNotification('Excel file downloaded!');
+                }
+            } catch (error) {
+                showNotification('Export failed', 'error');
+            }
+        }
+
+        async function exportPDF() {
+            try {
+                const response = await fetch('/export/pdf', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `transactions_${new Date().toISOString().split('T')[0]}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    showNotification('PDF file downloaded!');
+                }
+            } catch (error) {
+                showNotification('Export failed', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Initialize
+        loadUserData();
+        loadDashboard();
+    </script>
+</body>
+
+</html>

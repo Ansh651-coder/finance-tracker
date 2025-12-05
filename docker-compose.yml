@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-please-change-in-production}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///finance_tracker.db}
+      - FLASK_ENV=production
+    volumes:
+      - ./static/uploads:/app/static/uploads
+      - ./finance_tracker.db:/app/finance_tracker.db
+    restart: unless-stopped
+
+  # Optional: PostgreSQL database
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=financeuser
+      - POSTGRES_PASSWORD=financepass
+      - POSTGRES_DB=financetracker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

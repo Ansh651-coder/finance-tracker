@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Finance Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg">
+        <i class="fas fa-bars text-gray-700"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 gradient-bg text-white p-6 z-40">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold">Finance Tracker</h1>
+            <p class="text-purple-200 text-sm" id="sidebarUserName">Loading...</p>
+        </div>
+
+        <nav class="space-y-2">
+            <a href="/dashboard"
+                class="flex items-center space-x-3 hover:bg-white hover:bg-opacity-10 rounded-lg px-4 py-3 transition">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transactions-page"
+                class="flex items-center space-x-3 hover:bg-white hover:bg-opacity-10 rounded-lg px-4 py-3 transition">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="/profile-page" class="flex items-center space-x-3 bg-white bg-opacity-20 rounded-lg px-4 py-3">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <button onclick="logout()"
+                class="w-full flex items-center space-x-3 hover:bg-white hover:bg-opacity-10 rounded-lg px-4 py-3 transition">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="md:ml-64 p-4 md:p-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Profile Settings</h2>
+                <p class="text-gray-600">Manage your account information</p>
+            </div>
+
+            <!-- Profile Card -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+                <div class="flex flex-col md:flex-row items-center gap-6 mb-8">
+                    <div class="relative">
+                        <div
+                            class="w-32 h-32 rounded-full gradient-bg flex items-center justify-center text-white text-5xl font-bold">
+                            <span id="profileInitial">U</span>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <h3 class="text-2xl font-bold text-gray-800" id="profileName">Loading...</h3>
+                        <p class="text-gray-600" id="profileEmail">email@example.com</p>
+                        <p class="text-sm text-gray-500 mt-2">
+                            Member since <span id="memberSince">-</span>
+                        </p>
+                    </div>
+                </div>
+
+                <form id="profileForm" onsubmit="handleUpdateProfile(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-semibold mb-2">Full Name</label>
+                            <input type="text" id="name" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition"
+                                placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-semibold mb-2">Email Address</label>
+                            <input type="email" id="email" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition"
+                                placeholder="your@email.com">
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <button type="submit"
+                            class="gradient-bg text-white font-semibold py-3 px-8 rounded-lg hover:opacity-90 transition">
+                            <i class="fas fa-save mr-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Change Password</h3>
+                <form id="passwordForm" onsubmit="handleChangePassword(event)">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-semibold mb-2">New Password</label>
+                        <input type="password" id="newPassword" minlength="6"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition"
+                            placeholder="••••••••">
+                        <p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-semibold mb-2">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" minlength="6"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition"
+                            placeholder="••••••••">
+                    </div>
+                    <button type="submit"
+                        class="bg-purple-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-key mr-2"></i>Update Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Account Statistics -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Account Statistics</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center p-4 bg-purple-50 rounded-lg">
+                        <p class="text-gray-600 text-sm font-semibold">Total Transactions</p>
+                        <p class="text-3xl font-bold text-purple-600" id="totalTransactions">0</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <p class="text-gray-600 text-sm font-semibold">Total Income</p>
+                        <p class="text-3xl font-bold text-green-600" id="totalIncome">$0</p>
+                    </div>
+                    <div class="text-center p-4 bg-red-50 rounded-lg">
+                        <p class="text-gray-600 text-sm font-semibold">Total Expenses</p>
+                        <p class="text-3xl font-bold text-red-600" id="totalExpenses">$0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="bg-red-50 border-2 border-red-200 rounded-lg p-6 mt-6">
+                <h3 class="text-xl font-bold text-red-600 mb-4">Danger Zone</h3>
+                <p class="text-gray-700 mb-4">
+                    Once you delete your account, there is no going back. All your transactions and data will be
+                    permanently deleted.
+                </p>
+                <button onclick="confirmDeleteAccount()"
+                    class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition">
+                    <i class="fas fa-trash mr-2"></i>Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/';
+        }
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        });
+
+        async function loadUserProfile() {
+            try {
+                const response = await fetch('/auth/me', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const user = data.user;
+
+                    document.getElementById('sidebarUserName').textContent = user.name;
+                    document.getElementById('profileName').textContent = user.name;
+                    document.getElementById('profileEmail').textContent = user.email;
+                    document.getElementById('profileInitial').textContent = user.name.charAt(0).toUpperCase();
+                    document.getElementById('name').value = user.name;
+                    document.getElementById('email').value = user.email;
+
+                    const memberDate = new Date(user.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    document.getElementById('memberSince').textContent = memberDate;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/summary', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalTransactions').textContent = data.transaction_count;
+                    document.getElementById('totalIncome').textContent = formatCurrency(data.total_income);
+                    document.getElementById('totalExpenses').textContent = formatCurrency(data.total_expense);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function handleUpdateProfile(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+
+            try {
+                const response = await fetch('/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ name, email })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showNotification('Profile updated successfully!');
+                    loadUserProfile();
+                } else {
+                    const data = await response.json();
+                    showNotification(data.error || 'Failed to update profile', 'error');
+                }
+            } catch (error) {
+                showNotification('An error occurred', 'error');
+            }
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!newPassword || !confirmPassword) {
+                showNotification('Please fill in all password fields', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ password: newPassword })
+                });
+
+                if (response.ok) {
+                    showNotification('Password updated successfully!');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    const data = await response.json();
+                    showNotification(data.error || 'Failed to update password', 'error');
+                }
+            } catch (error) {
+                showNotification('An error occurred', 'error');
+            }
+        }
+
+        function confirmDeleteAccount() {
+            const confirmed = confirm('Are you absolutely sure? This action cannot be undone. All your data will be permanently deleted.');
+
+            if (confirmed) {
+                const doubleCheck = prompt('Type "DELETE" to confirm account deletion:');
+                if (doubleCheck === 'DELETE') {
+                    deleteAccount();
+                }
+            }
+        }
+
+        async function deleteAccount() {
+            // Note: This would require implementing a DELETE /profile endpoint in the backend
+            showNotification('Account deletion feature coming soon', 'error');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        loadUserProfile();
+        loadStats();
+    </script>
+</body>
+
+</html>
