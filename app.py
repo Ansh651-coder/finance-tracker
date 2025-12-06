@@ -33,6 +33,14 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 CORS(app)
+# Auto-create all tables on startup (works on Render)
+with app.app_context():
+    try:
+        db.create_all()
+        print("✔ Database tables initialized")
+    except Exception as e:
+        print("❌ Error initializing database:", e)
+
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
